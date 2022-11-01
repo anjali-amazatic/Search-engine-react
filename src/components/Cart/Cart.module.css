@@ -1,0 +1,14 @@
+.backgroundimg{
+    background-image: url("https://mdbootstrap.com/img/Photos/Horizontal/Nature/full page/img(11).webp");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center center;
+    min-height: 100vh;
+  }
+.logo{
+    vertical-align: middle;
+    position: absolute;
+    top: 247px;
+    left: 573px;
+    width: 450px;
+}

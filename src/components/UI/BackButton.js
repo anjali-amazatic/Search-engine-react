@@ -12,6 +12,10 @@ const Button = styled.button`
   padding: 0.25em 1em;
   border: 2px solid palevioletred;
   border-radius: 3px;
+  color: black;
+  position: absolute;
+  right: 4px;
+  top: -8px;
 `;
 
 function BackButton() {
@@ -20,6 +24,7 @@ function BackButton() {
   return (
     <div>
       <Button
+        type="button"
         primary
         onClick={() => {
           navigate("/");

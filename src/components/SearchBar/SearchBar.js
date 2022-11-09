@@ -1,10 +1,10 @@
 import { React, useEffect, useState } from "react";
-import classes from "./SearchBar.module.css";
 import { FaSearch, FaMicrophone } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import classes from "./SearchBar.module.css";
 import axiosInstance from "../../axios";
+import "react-toastify/dist/ReactToastify.css";
 
 const saveData = process.env.REACT_APP_BASE_API_URL + "api/search/";
 const viewall = process.env.REACT_APP_BASE_API_URL + "api/viewall/";
@@ -18,81 +18,108 @@ const SearchBar = () => {
   const [searchData, setSearchData] = useState("");
   const [searchIsValid, setSearchFormIsValid] = useState(false);
   const [viewALl, setViewAll] = useState(false);
-  const [navigateTo, setNavigateTo] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  // const [user, setUser] = useState(false);
+  // const [userName, setUserName] = useState("");
 
   const addSearch = (event) => {
-    navigate("/usersearch");
     event.preventDefault();
+    if (localStorage.getItem("token")) {
+      axiosInstance
+        .post(`${saveData}`, {
+          search_data: searchData,
+        })
+        .then(() => {
+          navigate("/usersearch");
+        })
+        .catch((err) => {
+          toast(err);
+        });
+    } else {
+      let list = localStorage.getItem("search")
+        ? JSON.parse(localStorage.getItem("search"))
+        : [];
+      list.push(searchData);
 
-    let list = localStorage.getItem("search")
-      ? JSON.parse(localStorage.getItem("search"))
-      : [];
-    list.push(searchData);
+      navigate("/usersearch");
 
-    localStorage.setItem("search", JSON.stringify(list));
-
-    if (list.length >= 3) {
-      toast("You Reached search Limit You have to Login!");
-      navigate("/login");
-      setNavigateTo(true);
-    }
-
-    if (navigateTo) {
-      // const response = axios.get(`${userMe}`);
-      if (localStorage.getItem("token")) {
-        for (var seachdata = 0; seachdata < list.length; seachdata++) {
-          axiosInstance
-            .post(`${saveData}`, {
-              search_data: list[seachdata],
-            })
-            .then((response) => {
-              console.log(response.data);
-            })
-            .catch((err) => {
-              toast(err);
-            });
-          localStorage.clear();
-        }
+      if (list.length >= 3 && !localStorage.getItem("token")) {
+        setViewAll(true);
+        toast("You Reached search Limit You have to Login!");
+        navigate("/login");
       }
+      localStorage.setItem("search", JSON.stringify(list));
     }
   };
 
-  const viewAll = (event) => {
-    event.preventDefault();
-    axiosInstance
-      .get(`${viewall}`)
-      .then((response) => {
-        console.log(response.data);
-      })
-      .catch((err) => {
-        toast(err);
-      });
+  const viewAll = () => {
+    if (isLoggedIn) {
+      axiosInstance
+        .get(`${viewall}`)
+        .then((response) => {
+          if (!response.data) {
+            toast("Nothing searched yet!");
+          } else {
+            setSearchDataList(response.data);
+            setViewAll(true);
+          }
+        })
+        .catch((err) => {
+          toast(err);
+        });
+    } else {
+      toast("You haven't search yet!");
+    }
   };
-
   useEffect(() => {
-    const token = localStorage.getItem("token");
     const searchList = localStorage.getItem("search");
-    if (token && isLoading === false) {
+    if (localStorage.getItem("token") && !isLoggedIn) {
       axiosInstance
         .get(`${userDataUrl}`)
         .then((response) => {
+          if (searchList) {
+            // setLocalData(searchList);
+            JSON.parse(searchList).map((item) => {
+              return axiosInstance
+                .post(`${saveData}`, {
+                  search_data: item,
+                })
+                .then(() => {
+                  setSearchDataList(searchList);
+                  localStorage.removeItem("search");
+                });
+            });
+          }
+          setIsLoggedIn(true);
         })
         .catch((err) => {
-          toast("Unable to login with provided credentials");
+          // toast("User does not exists!");
+        });
+      axiosInstance
+        .get(`${viewall}`)
+        .then((response) => {
+          setSearchDataList(response.data);
+        })
+        .catch((err) => {
+          // toast("User does not exists!");
         });
     }
-    setIsLoading(true);
     if (searchList) {
-      let data = JSON.parse(searchList);
+      let data = searchList;
       setSearchDataList(data);
+      console.log(typeof data);
     }
-    // let list = localStorage.getItem("search")
-    //   ? JSON.parse(localStorage.getItem("search"))
-    //   : [];
-    // list.push(searchData);
-  }, [searchData, isLoading]);
+  }, [isLoggedIn]);
 
+  const renderSearchData = () => {
+    if (!viewALl) {
+      return searchDataList.slice(0, 3);
+    }
+    return searchDataList;
+  };
+  const validate = (inputText) =>{
+    setSearchData(inputText.trim(""));
+  }
   return (
     <div className={classes.serachForm}>
       <form className={classes.search__form} onSubmit={addSearch}>
@@ -101,7 +128,7 @@ const SearchBar = () => {
           className={classes.home__input}
           value={searchData}
           onChange={(event) => {
-            setSearchData(event.target.value);
+            validate(event.target.value);
             setSearchFormIsValid(true);
           }}
           required
@@ -119,26 +146,24 @@ const SearchBar = () => {
         <FaSearch className={classes.search__icons} />
         <FaMicrophone className={classes.micropphone} />
       </form>
+
       {/* show item  */}
       <div className={classes.viewcontainer}>
         <div className={classes.home__group}>
           <div className={classes.searches}>
-            {searchDataList.length >= 1 &&
-              searchDataList.map((currentSearch, index) => {
-                return <div key={index}>{currentSearch}</div>;
-              })}
+            {renderSearchData().map((search, index) => {
+              return <div key={index}>{search.search_data}</div>;
+            })}
           </div>
-          {searchDataList <= 0 && <div>No searches found yet!</div>}
-
+          {!viewALl && searchDataList <= 0 && <div>No searches found yet!</div>}
           <button
             className={classes.btn}
-            disabled={!viewALl}
             onClick={() => {
-              viewAll();
-              setViewAll(true);
+              viewAll()
             }}
           >
-            View All
+          { viewALl? 'Hide all':'View all' }
+
           </button>
         </div>
       </div>

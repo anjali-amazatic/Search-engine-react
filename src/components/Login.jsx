@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import BackButton from "./UI/BackButton";
 import axiosInstance from "../axios";
+// import UserInfo from "./UserInfo/UserInfo";
 
 const loginURL = process.env.REACT_APP_BASE_API_URL + "api/user/login/";
 
@@ -14,6 +15,7 @@ const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loginIsValid, setLoginFormIsValid] = useState(false);
+  // const [loggedIn , setLoggedIn] = useState(false);
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -25,6 +27,8 @@ const Login = () => {
       .then((response) => {
         localStorage.setItem("token", response.data.token);
         toast("Logged in successfully!");
+        // setLoggedIn(true);
+        // localStorage.setItem('loggedin',loggedIn);
         navigate("/");
       })
       .catch((err) => {
@@ -33,9 +37,10 @@ const Login = () => {
   };
   return (
     <div className="login-page">
-      <BackButton />
       <form className="loginForm" onSubmit={handleSubmit}>
+        <BackButton /><br></br>
         <fieldset>
+          <span>Haven't register yet go back create your account!</span>
           <legend>Log In</legend>
           <ul>
             <li>
@@ -73,6 +78,16 @@ const Login = () => {
         <button className="login-button" disabled={!loginIsValid}>
           Login
         </button>
+        <button
+          className="reg-button"
+          type="button"
+          onClick={() => {
+            navigate("/signup");
+          }}
+        >
+          Create you're account!
+        </button>
+        {/* {loginIsValid && <UserInfo/>} */}
       </form>
     </div>
   );

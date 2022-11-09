@@ -1,6 +1,10 @@
 import axios from "axios";
 const loginURL = "api/user/login/";
 
+const axiosInstance = axios.create({
+  baseURL: process.env.REACT_APP_BASE_APP_URL,
+});
+
 const requestHandler = (request) => {
   if (!request.url.includes(loginURL)) {
     let token = localStorage.getItem("token");
@@ -9,9 +13,7 @@ const requestHandler = (request) => {
   }
   return request;
 };
-const axiosInstance = axios.create({
-  baseURL: process.env.REACT_APP_BASE_APP_URL,
-});
+
 
 axiosInstance.interceptors.request.use((request) => requestHandler(request));
 

@@ -1,14 +1,18 @@
-.backgroundimg{
-    background-image: url("https://mdbootstrap.com/img/Photos/Horizontal/Nature/full page/img(11).webp");
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: center center;
-    min-height: 100vh;
-  }
-.logo{
-    vertical-align: middle;
-    position: absolute;
-    top: 247px;
-    left: 573px;
-    width: 450px;
+.backgroundimg {
+  /* background-image: url("https://mdbootstrap.com/img/Photos/Horizontal/Nature/full page/img(11).webp"); */
+  /* background-repeat: no-repeat; */
+  /* background-size: cover; */
+  /* background-position: center center; */
+  /* height: 600px; */
+  background-image: url("https://mdbootstrap.com/img/Photos/Horizontal/Nature/full%20page/img(11).webp");
+  /* background-color: #cccccc; */
+  height: 900px;
+  background-repeat: no-repeat;
+}
+.logo {
+  vertical-align: middle;
+  position: absolute;
+  top: 247px;
+  left: 573px;
+  width: 450px;
 }
